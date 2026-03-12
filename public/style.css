@@ -3,10 +3,6 @@
  * File: style.css
  * v.2.1
  */
-/**
- * RSS TV Proxy - Responsive Stylesheet
- * Mobile-first design
- */
 
 :root {
     --primary: #e50914;
@@ -618,4 +614,26 @@ tr.is-read, .card.is-read {
         padding-left: 12px;
         border-left: 1px solid var(--border);
     }
+}
+
+/* Sort buttons — same base as filter-btn but accent colour when active */
+.sort-btn {
+    background: #222;
+    color: var(--text-dim);
+    border: 1px solid #444;
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition);
+    white-space: nowrap;
+}
+
+.sort-btn:hover { border-color: #666; color: var(--text); }
+
+.sort-btn.active {
+    background: #2a2a2a;
+    border-color: var(--accent);
+    color: var(--accent);
 }

@@ -92,6 +92,13 @@
                 <button class="filter-btn" data-filter="type" data-value="movie" onclick="setFilter('type','movie')">🎬 Movie</button>
             </div>
         </div>
+        <div class="filter-group">
+            <span class="filter-label">SORT</span>
+            <div class="filter-pills">
+                <button class="sort-btn active" data-value="newest" onclick="setSort('newest')">⬇ Newest</button>
+                <button class="sort-btn" data-value="oldest" onclick="setSort('oldest')">⬆ Oldest</button>
+            </div>
+        </div>
         <span id="result-count" class="result-count"></span>
     </div>
 

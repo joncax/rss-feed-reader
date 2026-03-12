@@ -4,18 +4,14 @@
  * v2.0
  * Features: Dynamic API URL, Persistent Sync, Title Sanitization, Zebra Striping, Media Icons.
  */
-/**
- * RSS TV Logic Controller
- * Features: Dynamic API URL, Persistent Sync, Title Sanitization, Zebra Striping, Media Icons.
- */
 
-// Dynamically resolve API base from current browser host+port — works for PROD and STG
 const API = `${window.location.protocol}//${window.location.hostname}:${window.location.port}`;
 
 let currentItems = [];
 let currentView = 'grid';
 let syncRegistry = null;
 let activeFilters = { quality: 'all', type: 'all' };
+let activeSort = 'newest'; // 'newest' | 'oldest'
 
 // --- 1. THE CLOCK (Timer Logic) ---
 
@@ -113,12 +109,17 @@ function getQualityKey(title) {
 
 function setFilter(type, value) {
     activeFilters[type] = value;
-
-    // Update button styles
     document.querySelectorAll(`.filter-btn[data-filter="${type}"]`).forEach(btn => {
         btn.classList.toggle('active', btn.dataset.value === value);
     });
+    renderMainUI();
+}
 
+function setSort(value) {
+    activeSort = value;
+    document.querySelectorAll('.sort-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.value === value);
+    });
     renderMainUI();
 }
 
@@ -152,9 +153,17 @@ async function renderMainUI() {
     // Update result count
     const countEl = document.getElementById('result-count');
     if (countEl) countEl.innerText = `${itemsToDisplay.length} result${itemsToDisplay.length !== 1 ? 's' : ''}`;
+
+    // Sort
+    itemsToDisplay.sort((a, b) => {
+        if (currentView === 'list') return a.title.localeCompare(b.title); // list view always A-Z
+        const dateA = a.pubDate ? new Date(a.pubDate) : new Date(a.timestamp || 0);
+        const dateB = b.pubDate ? new Date(b.pubDate) : new Date(b.timestamp || 0);
+        return activeSort === 'newest' ? dateB - dateA : dateA - dateB;
+    });
+
     const container = document.getElementById('content');
     if (currentView === 'list') {
-        itemsToDisplay.sort((a, b) => a.title.localeCompare(b.title));
         displayListView(itemsToDisplay, container);
     } else {
         displayGridView(itemsToDisplay, container);
