@@ -154,9 +154,8 @@ async function renderMainUI() {
     const countEl = document.getElementById('result-count');
     if (countEl) countEl.innerText = `${itemsToDisplay.length} result${itemsToDisplay.length !== 1 ? 's' : ''}`;
 
-    // Sort
+    // Sort — applies to both grid and list
     itemsToDisplay.sort((a, b) => {
-        if (currentView === 'list') return a.title.localeCompare(b.title); // list view always A-Z
         const dateA = a.pubDate ? new Date(a.pubDate) : new Date(a.timestamp || 0);
         const dateB = b.pubDate ? new Date(b.pubDate) : new Date(b.timestamp || 0);
         return activeSort === 'newest' ? dateB - dateA : dateA - dateB;
@@ -177,8 +176,9 @@ function displayListView(items, container) {
                 <tr>
                     <th width="40">Type</th>
                     <th>Name</th>
-                    <th width="80">Quality</th>
-                    <th width="80" style="text-align:right;">Action</th>
+                    <th class="col-quality" width="80">Quality</th>
+                    <th class="col-date" width="90">Date</th>
+                    <th width="70" style="text-align:right;">Action</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -188,6 +188,7 @@ function displayListView(items, container) {
         const icon = getMediaIcon(item.title);
         const quality = getQualityInfo(item.title);
         const rowClass = index % 2 === 0 ? 'row-even' : 'row-odd';
+        const date = item.pubDate ? new Date(item.pubDate).toLocaleDateString([], { day: '2-digit', month: 'short' }) : '—';
         return `
             <tr class="${rowClass} ${item.isRead ? 'is-read' : ''}">
                 <td>${icon}</td>
@@ -195,7 +196,8 @@ function displayListView(items, container) {
                     <div class="sanitized-name">${cleanName}</div>
                     <div class="original-meta">${item.title}</div>
                 </td>
-                <td><span class="quality-badge ${quality.className}">${quality.tag}</span></td>
+                <td class="col-quality"><span class="quality-badge ${quality.className}">${quality.tag}</span></td>
+                <td class="col-date" style="font-size:11px; color: var(--text-dim);">${date}</td>
                 <td style="text-align: right;">
                     <a href="${item.magnet}" class="magnet-link" onclick="toggleReadStatus('${item.guid}')">
                         🧲 GET
