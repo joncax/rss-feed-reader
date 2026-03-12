@@ -1,4 +1,12 @@
-node_modules/
+# Ambiente
 .env
+.env.staging
+
+# Logs
 *.log
+
+# Dependências
+node_modules/
+
+# Base de dados
 data.db
