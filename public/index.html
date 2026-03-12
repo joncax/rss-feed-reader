@@ -1,0 +1,112 @@
+<!-- index.html - v.2.0.0 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RSS TV Dashboard - Proxy</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+    <a href="index.html" class="logo">RSS TV PROXY</a>
+    
+    <nav class="main-nav">
+        <a href="index.html" class="nav-link active">📺 Dashboard</a>
+        <a href="manage.html" class="nav-link">⚙️ Manage Feeds</a>
+        <a href="status.html" class="nav-link">📊 System Status</a>
+    </nav>
+
+    <div id="sync-monitor" class="sync-monitor">
+        <span id="last-update-label">Last Sync: --:--</span>
+        <span class="divider">|</span>
+        <span id="next-sync-label" class="timer-text">Next Sync: --:--</span>
+    </div>
+</header>
+
+<div class="container">
+    <div class="controls">
+        <div class="panel centered-panel">
+            <h3>📥 ADD NEW STREAM</h3>
+            <div class="input-group">
+                <input type="text" id="feedName" placeholder="Feed Nickname (e.g. Other Top100)">
+                <input type="text" id="feedUrl" placeholder="RSS URL">
+                <button onclick="addFeed()" id="addBtn" class="primary-red">Register & Download</button>
+            </div>
+        </div>
+
+        <div class="panel centered-panel">
+            <h3>📂 LIBRARY & SETTINGS</h3>
+            <div class="input-group">
+                <select id="feedSelect" onchange="loadFeed()"></select>
+                
+                <div class="refresh-area">
+                    <label for="intervalSelect">REFRESH EVERY:</label>
+                    <select id="intervalSelect" onchange="updateInterval()">
+                        <option value="0">Off</option>
+                        <option value="3600000">Auto (1h)</option>
+                        <option value="1800000">30 Minutes</option>
+                        <option value="3600000">1 Hour</option>
+                        <option value="10800000">3 Hours</option>
+                        <option value="21600000">6 Hours</option>
+                        <option value="43200000">12 Hours</option>
+                    </select>
+                </div>
+                
+                <button class="secondary btn-sync-all" onclick="manualSyncAll()">
+                    <span class="icon">🔄</span> Sync All Now
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="search-container">
+        <div class="search-box">
+            <input type="text" id="search" class="search-bar" placeholder="Search titles..." onkeyup="filterItems()">
+        </div>
+        
+        <div class="view-controls">
+            <button class="view-btn active" id="btnGrid" onclick="switchView('grid')">🖼️ Grid</button>
+            <button class="view-btn" id="btnList" onclick="switchView('list')">📜 List (A-Z)</button>
+        </div>
+    </div>
+
+    <div class="filter-bar">
+        <div class="filter-group">
+            <span class="filter-label">QUALITY</span>
+            <div class="filter-pills">
+                <button class="filter-btn active" data-filter="quality" data-value="all" onclick="setFilter('quality','all')">All</button>
+                <button class="filter-btn" data-filter="quality" data-value="sd" onclick="setFilter('quality','sd')">SD</button>
+                <button class="filter-btn" data-filter="quality" data-value="480p" onclick="setFilter('quality','480p')">480p</button>
+                <button class="filter-btn q-hd" data-filter="quality" data-value="720p" onclick="setFilter('quality','720p')">720p</button>
+                <button class="filter-btn q-fhd" data-filter="quality" data-value="1080p" onclick="setFilter('quality','1080p')">1080p</button>
+                <button class="filter-btn q-uhd" data-filter="quality" data-value="4k" onclick="setFilter('quality','4k')">4K</button>
+            </div>
+        </div>
+        <div class="filter-group">
+            <span class="filter-label">TYPE</span>
+            <div class="filter-pills">
+                <button class="filter-btn active" data-filter="type" data-value="all" onclick="setFilter('type','all')">All</button>
+                <button class="filter-btn" data-filter="type" data-value="tv" onclick="setFilter('type','tv')">📺 TV</button>
+                <button class="filter-btn" data-filter="type" data-value="movie" onclick="setFilter('type','movie')">🎬 Movie</button>
+            </div>
+        </div>
+        <span id="result-count" class="result-count"></span>
+    </div>
+
+    <div id="loader" class="loader">SYNCHRONIZING WITH SERVER...</div>
+    
+    <div id="content" class="grid-view"></div>
+</div>
+
+<nav class="mobile-nav">
+    <a href="index.html" class="active"><span class="icon">📺</span>Dashboard</a>
+    <a href="manage.html"><span class="icon">⚙️</span>Manage</a>
+    <a href="status.html"><span class="icon">📊</span>Status</a>
+</nav>
+<script src="db.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>

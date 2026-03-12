@@ -10,3 +10,7 @@ node_modules/
 
 # Base de dados
 data.db
+
+# Others
+rss_feeds
+feeds.json

@@ -1,0 +1,152 @@
+<!-- manage.html - v.2.0.0 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Feeds - RSS TV Proxy</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+    <a href="index.html" class="logo">RSS TV PROXY</a>
+    
+    <nav class="main-nav">
+        <a href="index.html" class="nav-link">📺 Dashboard</a>
+        <a href="manage.html" class="nav-link active">⚙️ Manage Feeds</a>
+        <a href="status.html" class="nav-link">📊 System Status</a>
+    </nav>
+
+    <div id="sync-monitor" class="sync-monitor">
+        <span id="next-sync-label" class="timer-text">Next Sync: --:--</span>
+    </div>
+</header>
+
+<div class="container">
+    <div class="panel" style="margin-top: 20px;">
+        <h3>Registry Management</h3>
+        <p style="color: var(--text-dim); font-size: 13px; margin-bottom: 20px;">
+            View and manage your registered RSS sources. Deleting a feed will remove its local XML cache and stop automated synchronization.
+        </p>
+
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Nickname</th>
+                    <th>Source URL</th>
+                    <th>Last Updated</th>
+                    <th style="text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="registry-list">
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<nav class="mobile-nav">
+    <a href="index.html"><span class="icon">⚙️</span>Dashboard</a>
+    <a href="manage.html" class="active"><span class="icon">⚙️</span>Manage</a>
+    <a href="status.html"><span class="icon">📊</span>Status</a>
+</nav>
+<script src="db.js"></script>
+<script>
+    const API = `${window.location.protocol}//${window.location.hostname}:${window.location.port}`;
+
+    async function loadRegistry() {
+        try {
+            const res = await fetch(`${API}/sync-status`);
+            const registry = await res.json();
+            const list = document.getElementById('registry-list');
+
+            list.innerHTML = Object.entries(registry.feeds).map(([name, data]) => {
+                const lastSync = data.lastUpdated
+                    ? new Date(data.lastUpdated).toLocaleString()
+                    : 'Never';
+                return `
+                    <tr>
+                        <td><strong>${name}</strong></td>
+                        <td><code style="font-size: 11px; color: #777;">${data.url.substring(0, 50)}...</code></td>
+                        <td>${lastSync}</td>
+                        <td style="text-align: right; white-space: nowrap;">
+                            <button class="secondary" style="margin-right: 8px;" onclick="editFeed('${name}', '${data.url}')">✏️ Edit</button>
+                            <button class="btn-danger" onclick="deleteFeed('${name}')">🗑️ Delete</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        } catch (e) {
+            console.error("Failed to load registry:", e);
+        }
+    }
+
+    async function editFeed(oldName, oldUrl) {
+        const newName = prompt("Edit Nickname:", oldName);
+        const newUrl = prompt("Edit RSS URL:", oldUrl);
+
+        if (newName && newUrl && (newName !== oldName || newUrl !== oldUrl)) {
+            try {
+                if (newName !== oldName) {
+                    await fetch(`${API}/delete-feed/${oldName}`, { method: 'DELETE' });
+                    await deleteEpisodesByFeed(oldName);
+                }
+                await fetch(`${API}/add-feed`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: newName, url: newUrl })
+                });
+                loadRegistry();
+            } catch (e) {
+                alert("Error updating feed.");
+            }
+        }
+    }
+
+    async function deleteFeed(name) {
+        if (!confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.`)) return;
+        try {
+            const res = await fetch(`${API}/delete-feed/${name}`, { method: 'DELETE' });
+            if (res.ok) {
+                await deleteEpisodesByFeed(name);
+                loadRegistry();
+            }
+        } catch (e) {
+            alert("Error deleting feed.");
+        }
+    }
+
+    function updateTimer() {
+        fetch(`${API}/sync-status`).then(r => r.json()).then(reg => {
+            const nextLabel = document.getElementById('next-sync-label');
+            const interval = reg.settings.syncIntervalMs;
+            if (interval === 0) return nextLabel.innerText = "Next Sync: OFF";
+
+            let latest = 0;
+            for (const f in reg.feeds) {
+                if (reg.feeds[f].lastUpdated > latest) latest = reg.feeds[f].lastUpdated;
+            }
+            if (latest === 0) return nextLabel.innerText = "Next Sync: Pending";
+
+            const diff = (latest + interval) - Date.now();
+            if (diff > 0) {
+                const mins = Math.floor((diff / 1000 / 60) % 60);
+                const secs = Math.floor((diff / 1000) % 60);
+                nextLabel.innerText = `Next Sync: ${mins}m ${secs}s`;
+            } else {
+                nextLabel.innerText = "Next Sync: Syncing...";
+            }
+        }).catch(() => {
+            document.getElementById('next-sync-label').innerText = "Server: Offline";
+        });
+    }
+
+    window.onload = () => {
+        loadRegistry();
+        updateTimer();
+        setInterval(updateTimer, 1000);
+    };
+</script>
+
+</body>
+</html>
