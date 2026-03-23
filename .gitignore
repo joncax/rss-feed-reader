@@ -14,3 +14,7 @@ data.db
 # Others
 rss_feeds
 feeds.json
+
+#Documentação Phase 1 >> .gitignore
+docs/
+DOCS.md
