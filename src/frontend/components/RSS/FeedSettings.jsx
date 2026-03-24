@@ -18,7 +18,6 @@ export default function FeedSettings({
   const feedsArray = Array.isArray(feeds) ? feeds : [];
   const intervals = [
     { value: 0, label: 'Off' },
-    { value: 3600000, label: 'Auto (1h)' },
     { value: 1800000, label: '30 Minutes' },
     { value: 3600000, label: '1 Hour' },
     { value: 10800000, label: '3 Hours' },
