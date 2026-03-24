@@ -8,10 +8,10 @@ import React from 'react';
 
 export default function Navigation({ activeTab = 'rss', setActiveTab = () => {} }) {
   const tabs = [
-    { id: 'rss', label: '📺 Dashboard', icon: '📺' },
-    { id: 'manage', label: '⚙️ Manage Feeds', icon: '⚙️' },
-    { id: 'downloads', label: '📥 Download Center', icon: '📥' },
-    { id: 'status', label: '📊 System Status', icon: '📊' }
+    { id: 'rss', label: 'Dashboard', icon: '📺' },
+    { id: 'manage', label: 'Manage Feeds', icon: '⚙️' },
+    { id: 'downloads', label: 'Download Center', icon: '📥' },
+    { id: 'status', label: 'System Status', icon: '📊' }
   ];
 
   return (
