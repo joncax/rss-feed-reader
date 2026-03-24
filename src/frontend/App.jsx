@@ -3,17 +3,20 @@ import Header from './components/Layout/Header'
 import Navigation from './components/Layout/Navigation'
 import Container from './components/Layout/Container'
 import RSSFeedManager from './components/RSS/RSSFeedManager'
+import ManageFeeds from './components/RSS/ManageFeeds'
 import DownloadCenter from './components/DownloadCenter/DownloadCenter'
 import SystemStatus from './components/Status/SystemStatus'
 import './styles/App.css'
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('rss') // 'rss', 'downloads', 'status'
+  const [activeTab, setActiveTab] = useState('rss') // 'rss', 'manage', 'downloads', 'status'
 
   const renderTab = () => {
     switch (activeTab) {
       case 'rss':
         return <RSSFeedManager />
+      case 'manage':
+        return <ManageFeeds />
       case 'downloads':
         return <DownloadCenter />
       case 'status':

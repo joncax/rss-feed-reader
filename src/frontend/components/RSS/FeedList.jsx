@@ -1,93 +1,96 @@
 /**
- * FeedList Component
- * File: src/frontend/components/RSS/FeedList.jsx
- * List view (tabela) para mostrar feeds em formato de tabela
+ * FeedsList Component
+ * File: src/frontend/components/RSS/FeedsList.jsx
+ * Tabela com lista de feeds cadastrados
  */
 
 import React from 'react';
 import Badge from '../ui/Badge';
-import { getMediaIcon, getQualityInfo, sanitizeTitle } from '../../services/formatters';
 
-export default function FeedList({
-  items = [],
-  onMagnet = null,
-  onToggleRead = null,
-  readItems = []
+export default function FeedsList({
+  feeds = [],
+  onEdit = () => {},
+  onDelete = () => {},
+  onRefresh = () => {},
+  isDeleting = () => false,
+  isRefreshing = () => false
 }) {
-  if (items.length === 0) {
+  if (feeds.length === 0) {
     return (
       <div className="empty-state">
-        <p>📭 No items found</p>
+        <p>📭 No feeds yet</p>
         <p style={{ fontSize: '12px', color: '#999' }}>
-          Try adjusting your filters or search query
+          Add your first RSS feed to get started
         </p>
       </div>
     );
   }
 
-  const handleMagnetClick = (magnet) => {
-    if (magnet) {
-      window.location.href = magnet;
-    }
-  };
-
-  const handleReadToggle = (guid, e) => {
-    e.stopPropagation();
-    if (onToggleRead) {
-      onToggleRead(guid);
-    }
-  };
-
   return (
-    <div className="feed-list-wrapper">
-      <table className="feed-list">
+    <div className="feeds-list-wrapper">
+      <table className="feeds-list">
         <thead>
           <tr>
-            <th width="40">Type</th>
+            <th width="30"></th>
             <th>Name</th>
-            <th width="80">Quality</th>
-            <th width="90">Date</th>
-            <th width="70" style={{ textAlign: 'right' }}>Action</th>
+            <th width="150">Status</th>
+            <th width="120">Last Updated</th>
+            <th width="200" style={{ textAlign: 'right' }}>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {items.map((item, index) => {
-            const cleanTitle = sanitizeTitle(item.title);
-            const icon = getMediaIcon(item.title);
-            const quality = getQualityInfo(item.title);
-            const isRead = readItems.includes(item.guid);
-            const date = item.pubDate
-              ? new Date(item.pubDate).toLocaleDateString([], { day: '2-digit', month: 'short' })
-              : '—';
+          {feeds.map((feed, index) => {
+            const feedName = typeof feed === 'string' ? feed : feed.name || feed;
+            const feedUrl = feed.url || feed.rss || '';
+            const lastUpdated = feed.lastUpdated || feed.updated || 'Never';
+            const itemCount = feed.itemCount || feed.count || 0;
             const rowClass = index % 2 === 0 ? 'row-even' : 'row-odd';
 
             return (
-              <tr key={item.guid} className={`${rowClass} ${isRead ? 'is-read' : ''}`}>
-                <td>{icon}</td>
+              <tr key={feedName} className={rowClass}>
+                <td>📺</td>
                 <td>
-                  <div className="sanitized-name">{cleanTitle}</div>
-                  <div className="original-meta" title={item.title}>
-                    {item.title}
+                  <div className="feed-name">{feedName}</div>
+                  <div className="feed-url" title={feedUrl}>
+                    {feedUrl}
                   </div>
                 </td>
                 <td>
                   <Badge
-                    type={quality.className}
-                    label={quality.tag}
+                    type="info"
+                    label={`${itemCount} items`}
                     size="small"
                   />
                 </td>
                 <td style={{ fontSize: '11px', color: 'var(--text-dim, #999)' }}>
-                  {date}
+                  {lastUpdated}
                 </td>
                 <td style={{ textAlign: 'right' }}>
-                  <button
-                    className="magnet-link"
-                    onClick={() => handleMagnetClick(item.magnet)}
-                    title="Download"
-                  >
-                    🧲 GET
-                  </button>
+                  <div className="feed-actions">
+                    <button
+                      className="feed-action-btn refresh-btn"
+                      onClick={() => onRefresh(feedName)}
+                      disabled={isRefreshing(feedName)}
+                      title="Refresh feed"
+                    >
+                      {isRefreshing(feedName) ? '⏳' : '🔄'}
+                    </button>
+                    <button
+                      className="feed-action-btn edit-btn"
+                      onClick={() => onEdit(feed)}
+                      title="Edit feed"
+                    >
+                      ✏️
+                    </button>
+                    <button
+                      className="feed-action-btn delete-btn"
+                      onClick={() => onDelete(feedName)}
+                      disabled={isDeleting(feedName)}
+                      title="Delete feed"
+                    >
+                      {isDeleting(feedName) ? '⏳' : '🗑️'}
+                    </button>
+                  </div>
                 </td>
               </tr>
             );
