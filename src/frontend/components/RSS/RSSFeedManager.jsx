@@ -10,70 +10,68 @@ import FeedFilters from './FeedFilters';
 import FeedSettings from './FeedSettings';
 import FeedGrid from './FeedGrid';
 import FeedList from './FeedList';
+import { useFeeds } from '../../hooks/useFeeds';
 import { useFilterSort } from '../../hooks/useFilterSort';
 import Modal from '../ui/Modal';
 
 export default function RSSFeedManager() {
-  // Sample data para demonstração
-  const [sampleItems] = useState([
-    {
-      guid: '1',
-      title: 'The Matrix 1080p BluRay',
-      magnet: 'magnet:?xt=urn:btih:...',
-      pubDate: new Date().toISOString(),
-      category: 'movie'
-    },
-    {
-      guid: '2',
-      title: 'Breaking Bad S05E16 720p',
-      magnet: 'magnet:?xt=urn:btih:...',
-      pubDate: new Date(Date.now() - 86400000).toISOString(),
-      category: 'tv'
-    }
-  ]);
-
-  const {
-    filteredItems,
-    searchQuery,
-    setSearchQuery,
-    filters,
-    setQualityFilter,
-    setTypeFilter,
-    clearFilters,
-    hasActiveFilters,
-    sortBy,
-    setSort,
-    viewMode,
-    toggleViewMode,
-    qualityStats,
-    typeStats
-  } = useFilterSort(sampleItems);
-
-  const [selectedFeed, setSelectedFeed] = useState('');
-  const [syncInterval, setSyncInterval] = useState(3600000);
-  const [isSyncing, setIsSyncing] = useState(false);
   const [showAddFeedModal, setShowAddFeedModal] = useState(false);
   const [feedName, setFeedName] = useState('');
   const [feedUrl, setFeedUrl] = useState('');
 
-  const feeds = ['Feed 1', 'Feed 2', 'Feed 3'];
+  // Hooks
+  const feeds = useFeeds({
+    pollInterval: 10000,
+    autoStart: true
+  });
+
+  const filterSort = useFilterSort(feeds.feedItems);
+
+  // =============================================
+  // HANDLERS
+  // =============================================
 
   const handleAddFeed = async () => {
     if (!feedName.trim() || !feedUrl.trim()) {
       alert('Please fill in both name and URL');
       return;
     }
-    console.log('Adding feed:', feedName, feedUrl);
-    setFeedName('');
-    setFeedUrl('');
-    setShowAddFeedModal(false);
+
+    try {
+      await feeds.addFeed(feedName, feedUrl);
+      setFeedName('');
+      setFeedUrl('');
+      setShowAddFeedModal(false);
+      alert('Feed added successfully!');
+    } catch (error) {
+      alert(`Error adding feed: ${error.message}`);
+    }
+  };
+
+  const handleSelectFeed = async (feedName) => {
+    if (feedName) {
+      try {
+        await feeds.loadFeedItems(feedName);
+      } catch (error) {
+        alert(`Error loading feed: ${error.message}`);
+      }
+    }
   };
 
   const handleSyncNow = async () => {
-    setIsSyncing(true);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setIsSyncing(false);
+    try {
+      await feeds.refetch();
+      if (feeds.selectedFeed) {
+        await feeds.loadFeedItems(feeds.selectedFeed);
+      }
+    } catch (error) {
+      alert(`Error syncing: ${error.message}`);
+    }
   };
+
+  // =============================================
+  // RENDER
+  // =============================================
 
   return (
     <div className="rss-feed-manager">
@@ -87,6 +85,7 @@ export default function RSSFeedManager() {
         </button>
       </div>
 
+      {/* Add Feed Modal */}
       <Modal
         isOpen={showAddFeedModal}
         title="Add New RSS Feed"
@@ -119,41 +118,64 @@ export default function RSSFeedManager() {
         </div>
       </Modal>
 
+      {/* Settings */}
       <FeedSettings
-        selectedFeed={selectedFeed}
-        feeds={feeds}
-        onFeedChange={setSelectedFeed}
-        syncInterval={syncInterval}
-        onIntervalChange={setSyncInterval}
+        selectedFeed={feeds.selectedFeed || ''}
+        feeds={feeds.feeds}
+        onFeedChange={handleSelectFeed}
+        syncInterval={feeds.syncInterval}
+        onIntervalChange={feeds.setSyncInterval}
         onSyncNow={handleSyncNow}
-        isSyncing={isSyncing}
+        isSyncing={feeds.actionLoading === `load-${feeds.selectedFeed}`}
       />
 
-      <FeedSearchBar
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        viewMode={viewMode}
-        toggleViewMode={toggleViewMode}
-        resultCount={filteredItems.length}
-        totalCount={sampleItems.length}
-      />
+      {/* Loading State */}
+      {feeds.loading && (
+        <div className="loader">Loading feeds...</div>
+      )}
 
-      <FeedFilters
-        filters={filters}
-        setQualityFilter={setQualityFilter}
-        setTypeFilter={setTypeFilter}
-        sortBy={sortBy}
-        setSort={setSort}
-        clearFilters={clearFilters}
-        hasActiveFilters={hasActiveFilters}
-        qualityStats={qualityStats}
-        typeStats={typeStats}
-      />
+      {/* Error State */}
+      {feeds.error && (
+        <div className="error-message">
+          <p>Error loading feeds: {feeds.error.message}</p>
+          <button className="btn btn-secondary" onClick={() => feeds.refetch()}>
+            Retry
+          </button>
+        </div>
+      )}
 
-      {viewMode === 'grid' ? (
-        <FeedGrid items={filteredItems} />
-      ) : (
-        <FeedList items={filteredItems} />
+      {/* Search & View Toggle */}
+      {!feeds.loading && !feeds.error && (
+        <>
+          <FeedSearchBar
+            searchQuery={filterSort.searchQuery}
+            setSearchQuery={filterSort.setSearchQuery}
+            viewMode={filterSort.viewMode}
+            toggleViewMode={filterSort.toggleViewMode}
+            resultCount={filterSort.filteredItems.length}
+            totalCount={feeds.feedItems.length}
+          />
+
+          {/* Filters */}
+          <FeedFilters
+            filters={filterSort.filters}
+            setQualityFilter={filterSort.setQualityFilter}
+            setTypeFilter={filterSort.setTypeFilter}
+            sortBy={filterSort.sortBy}
+            setSort={filterSort.setSort}
+            clearFilters={filterSort.clearFilters}
+            hasActiveFilters={filterSort.hasActiveFilters}
+            qualityStats={filterSort.qualityStats}
+            typeStats={filterSort.typeStats}
+          />
+
+          {/* Content - Grid or List */}
+          {filterSort.viewMode === 'grid' ? (
+            <FeedGrid items={filterSort.filteredItems} />
+          ) : (
+            <FeedList items={filterSort.filteredItems} />
+          )}
+        </>
       )}
     </div>
   );
