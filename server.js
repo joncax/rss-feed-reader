@@ -1,267 +1,164 @@
 /**
- * RSS Feed Reader + Torrent Media Server
+ * RSS Feed Reader - Express Server
  * File: server.js
- * v.2.1
- * Features: RSS Feeds, Torrent Downloads, Storage Management, API REST
- * Fase 1D (API Routers) - COMPLETO
+ * v.2.2 — Phase 1D + Phase 1H
+ * Main entry point for backend API with complete routing
  */
 
 import express from 'express';
 import cors from 'cors';
-import axios from 'axios';
-import { load as cheerio } from 'cheerio';
-import fs from 'fs';
+import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import dotenv from 'dotenv';
 
-import db from './src/backend/db-init.js';
-import torrentService from './src/backend/torrent-service.js';
-import storageService from './src/backend/storage-service.js';
-
+// Imports - API Routers
+import feedsRouter from './src/backend/api/feeds.js';
 import downloadsRouter from './src/backend/api/downloads.js';
 import storageRouter from './src/backend/api/storage.js';
 import historyRouter from './src/backend/api/history.js';
 import quotaRouter from './src/backend/api/quota.js';
 
-// Load environment variables
+// Setup
 dotenv.config();
-
-// Get __dirname and __filename (ESM)
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// App setup
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = process.env.PORT || 3002;
 
-// Middleware
+// =============================================
+// MIDDLEWARE
+// =============================================
+
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'dist')));
 
-// ========================================
-// PHASE 1 API ROUTES
-// ========================================
+// =============================================
+// API ROUTES (Phase 1D + Phase 1H)
+// =============================================
 
-// Downloads Management
+// RSS Feeds Management (Phase 1H)
+app.use('/api/feeds', feedsRouter);
+
+// Downloads Management (Phase 1D)
 app.use('/api/downloads', downloadsRouter);
 
-// Storage & Quota
+// Storage & Quota (Phase 1D)
 app.use('/api/storage', storageRouter);
 
-// Download History
+// Download History (Phase 1D)
 app.use('/api/download-history', historyRouter);
 
-// Quota Monitoring
+// Quota Monitoring (Phase 1D)
 app.use('/api/quota', quotaRouter);
 
-// ========================================
+// =============================================
 // HEALTH CHECK
-// ========================================
+// =============================================
 
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
+    message: 'RSS Feed Reader API is online 🚀',
+    version: '2.2',
+    phase: 'Phase 1D + 1H',
     timestamp: new Date().toISOString(),
-    version: '2.1',
+    nodeVersion: process.version,
+    environment: process.env.NODE_ENV || 'development',
     features: [
-      'RSS Feeds',
+      'RSS Feeds Management',
       'Torrent Downloads',
       'Storage Management',
       'Quota Monitoring',
       'Download History'
-    ]
+    ],
+    endpoints: {
+      feeds: '/api/feeds',
+      downloads: '/api/downloads',
+      storage: '/api/storage',
+      history: '/api/download-history',
+      quota: '/api/quota'
+    }
   });
 });
 
-// ========================================
-// RSS FEED ENDPOINTS (Existentes - manter)
-// ========================================
+// =============================================
+// STATIC FILES & SPA FALLBACK
+// =============================================
 
-// GET /api/feeds - Listar feeds
-app.get('/api/feeds', (req, res) => {
-  try {
-    const feedsPath = path.join(__dirname, 'feeds.json');
-    if (fs.existsSync(feedsPath)) {
-      const feeds = JSON.parse(fs.readFileSync(feedsPath, 'utf8'));
-      res.json({
-        success: true,
-        count: feeds.length,
-        data: feeds
-      });
-    } else {
-      res.json({
-        success: true,
-        count: 0,
-        data: []
-      });
-    }
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      error: err.message
-    });
-  }
+// Serve React build
+app.use(express.static(path.join(__dirname, 'dist')));
+
+// SPA fallback — render index.html for all routes
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
-// POST /api/feeds - Adicionar feed
-app.post('/api/feeds', (req, res) => {
-  try {
-    const { name, url } = req.body;
-
-    if (!name || !url) {
-      return res.status(400).json({
-        success: false,
-        error: 'name and url required'
-      });
-    }
-
-    const feedsPath = path.join(__dirname, 'feeds.json');
-    let feeds = [];
-
-    if (fs.existsSync(feedsPath)) {
-      feeds = JSON.parse(fs.readFileSync(feedsPath, 'utf8'));
-    }
-
-    // Verificar duplicado
-    if (feeds.some(f => f.url === url)) {
-      return res.status(409).json({
-        success: false,
-        error: 'Feed already exists'
-      });
-    }
-
-    feeds.push({
-      name,
-      url,
-      lastUpdated: new Date().toISOString()
-    });
-
-    fs.writeFileSync(feedsPath, JSON.stringify(feeds, null, 2));
-
-    res.status(201).json({
-      success: true,
-      message: 'Feed added',
-      data: { name, url }
-    });
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      error: err.message
-    });
-  }
-});
-
-// DELETE /api/feeds/:name - Remover feed
-app.delete('/api/feeds/:name', (req, res) => {
-  try {
-    const feedsPath = path.join(__dirname, 'feeds.json');
-
-    if (!fs.existsSync(feedsPath)) {
-      return res.status(404).json({
-        success: false,
-        error: 'No feeds found'
-      });
-    }
-
-    let feeds = JSON.parse(fs.readFileSync(feedsPath, 'utf8'));
-    const originalLength = feeds.length;
-    feeds = feeds.filter(f => f.name !== req.params.name);
-
-    if (feeds.length === originalLength) {
-      return res.status(404).json({
-        success: false,
-        error: 'Feed not found'
-      });
-    }
-
-    fs.writeFileSync(feedsPath, JSON.stringify(feeds, null, 2));
-
-    res.json({
-      success: true,
-      message: 'Feed removed',
-      feedName: req.params.name
-    });
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      error: err.message
-    });
-  }
-});
-
-// ========================================
-// ROOT & FALLBACK
-// ========================================
-
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-app.get('/status', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'status.html'));
-});
-
-// ========================================
+// =============================================
 // ERROR HANDLING
-// ========================================
+// =============================================
 
 app.use((err, req, res, next) => {
   console.error('🔴 Error:', err);
-  res.status(500).json({
+  res.status(err.status || 500).json({
     success: false,
-    error: err.message,
+    error: err.message || 'Internal Server Error',
     timestamp: new Date().toISOString()
   });
 });
 
-// 404 Handler
-app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    error: 'Route not found',
-    path: req.path
-  });
-});
-
-// ========================================
+// =============================================
 // START SERVER
-// ========================================
+// =============================================
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`
-╔════════════════════════════════════════╗
-║   🚀 RSS Feed Reader + Torrent Server  ║
-║     v2.1 — Phase 1D (API Routers)      ║
-╚════════════════════════════════════════╝
-
-📡 Server running on: http://localhost:${PORT}
-🌍 Network access: http://192.168.1.86:${PORT}
-
-📚 API Endpoints:
-  ✅ /api/health                    — Health check
-  📥 /api/downloads                 — Download management
-  💾 /api/storage/stats             — Storage quota
-  📊 /api/download-history          — Download history
-  ⚙️ /api/quota/stats               — Quota monitoring
-
-🔗 RSS Feed Endpoints:
-  📰 /api/feeds                     — List/add feeds
-  🗑️  /api/feeds/:name             — Delete feed
-
-🌐 Web Interface:
-  🏠 http://localhost:${PORT}/              — Main page
-  📊 http://localhost:${PORT}/status        — Status page
-
-⏰ Started at: ${new Date().toISOString()}
+╔══════════════════════════════════════════════════════════════╗
+║  📺 RSS Feed Reader + Torrent Media Server                   ║
+║  v2.2 — Phase 1D (Torrents) + Phase 1H (RSS Feeds)          ║
+╠══════════════════════════════════════════════════════════════╣
+║  ✅ Server running on port ${PORT}
+║  🔗 Health Check: http://localhost:${PORT}/api/health
+║  📡 Network Access: http://192.168.1.86:${PORT}/api/health
+║  🌐 Web UI: http://localhost:${PORT}
+║  📦 Version: 2.2
+║  🌍 Environment: ${process.env.NODE_ENV || 'development'}
+╠══════════════════════════════════════════════════════════════╣
+║  📚 API ENDPOINTS:
+║  
+║  📰 RSS FEEDS (Phase 1H):
+║    GET  /api/feeds                    — List all feeds
+║    POST /api/feeds                    — Add new feed
+║    GET  /api/feeds/:name              — Get feed items
+║    PATCH /api/feeds/:name             — Update feed
+║    DELETE /api/feeds/:name            — Delete feed
+║    POST /api/feeds/:name/refresh      — Sync feed
+║    GET  /api/feeds/stats/overview     — Feed statistics
+║
+║  📥 DOWNLOADS (Phase 1D):
+║    GET  /api/downloads                — List downloads
+║    POST /api/downloads                — Add download
+║    GET  /api/downloads/:id            — Get download details
+║    DELETE /api/downloads/:id          — Delete download
+║
+║  💾 STORAGE (Phase 1D):
+║    GET  /api/storage/stats            — Storage stats
+║    GET  /api/storage/categories       — Storage by category
+║
+║  📊 HISTORY (Phase 1D):
+║    GET  /api/download-history         — Download history
+║    GET  /api/download-history/stats   — History statistics
+║
+║  ⚙️ QUOTA (Phase 1D):
+║    GET  /api/quota/stats              — Quota monitoring
+║    GET  /api/quota/alerts             — Storage alerts
+║
+╚══════════════════════════════════════════════════════════════╝
   `);
 });
 
 // Graceful shutdown
 process.on('SIGINT', () => {
   console.log('\n\n⏹️  Shutting down gracefully...');
-  torrentService.destroy();
   process.exit(0);
 });
