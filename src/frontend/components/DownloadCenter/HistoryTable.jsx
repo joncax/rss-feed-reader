@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import Badge from '../ui/Badge';
 import { formatBytes, formatDate } from '../../services/formatters';
 
@@ -172,7 +171,3 @@ export default function HistoryTable({ history = {} }) {
     </div>
   );
 }
-
-HistoryTable.propTypes = {
-  history: PropTypes.object.isRequired
-};
