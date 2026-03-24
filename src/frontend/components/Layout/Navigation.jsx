@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 
 export default function Navigation({ activeTab = 'rss', setActiveTab = () => {} }) {
   const tabs = [
@@ -32,8 +31,3 @@ export default function Navigation({ activeTab = 'rss', setActiveTab = () => {} 
     </nav>
   );
 }
-
-Navigation.propTypes = {
-  activeTab: PropTypes.string.isRequired,
-  setActiveTab: PropTypes.func.isRequired
-};

@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import { getStatusColor, getStatusLabel } from '../../services/formatters';
 
 export default function Badge({
@@ -41,27 +40,3 @@ export default function Badge({
     </span>
   );
 }
-
-Badge.propTypes = {
-  label: PropTypes.string,
-  type: PropTypes.oneOf([
-    'default',
-    'success',
-    'error',
-    'warning',
-    'info',
-    'downloading',
-    'completed',
-    'copying',
-    'moved',
-    'cleaned',
-    'failed',
-    'cancelled',
-    'awaiting_action',
-    'ok',
-    'critical'
-  ]),
-  size: PropTypes.oneOf(['small', 'medium', 'large']),
-  className: PropTypes.string,
-  style: PropTypes.object
-};

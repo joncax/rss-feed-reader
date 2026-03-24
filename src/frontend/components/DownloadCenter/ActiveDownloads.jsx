@@ -5,7 +5,6 @@
  */
 
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
 import DownloadCard from './DownloadCard';
 import Modal from '../ui/Modal';
 import { formatBytes } from '../../services/formatters';
@@ -121,8 +120,3 @@ export default function ActiveDownloads({ downloads = {}, storage = {} }) {
     </div>
   );
 }
-
-ActiveDownloads.propTypes = {
-  downloads: PropTypes.object.isRequired,
-  storage: PropTypes.object.isRequired
-};

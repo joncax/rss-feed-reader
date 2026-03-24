@@ -5,7 +5,6 @@
  */
 
 import React, { useEffect } from 'react';
-import PropTypes from 'prop-types';
 
 export default function Modal({
   isOpen = false,
@@ -110,20 +109,3 @@ export default function Modal({
     </div>
   );
 }
-
-Modal.propTypes = {
-  isOpen: PropTypes.bool,
-  title: PropTypes.string,
-  children: PropTypes.node.isRequired,
-  onClose: PropTypes.func,
-  onConfirm: PropTypes.func,
-  confirmText: PropTypes.string,
-  cancelText: PropTypes.string,
-  showCancelButton: PropTypes.bool,
-  showConfirmButton: PropTypes.bool,
-  isDangerous: PropTypes.bool,
-  size: PropTypes.oneOf(['small', 'medium', 'large']),
-  closeOnBackdrop: PropTypes.bool,
-  className: PropTypes.string,
-  style: PropTypes.object
-};

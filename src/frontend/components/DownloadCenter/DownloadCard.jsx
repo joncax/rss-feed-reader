@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import Card from '../ui/Card';
 import ProgressBar from '../ui/ProgressBar';
 import Badge from '../ui/Badge';
@@ -131,11 +130,3 @@ export default function DownloadCard({
     </Card>
   );
 }
-
-DownloadCard.propTypes = {
-  download: PropTypes.object.isRequired,
-  onCopy: PropTypes.func,
-  onCleanup: PropTypes.func,
-  onDelete: PropTypes.func,
-  isLoading: PropTypes.bool
-};

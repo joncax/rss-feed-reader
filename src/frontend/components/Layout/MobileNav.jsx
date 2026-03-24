@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 
 export default function MobileNav({ activeTab = 'rss', setActiveTab = () => {} }) {
   const tabs = [
@@ -30,8 +29,3 @@ export default function MobileNav({ activeTab = 'rss', setActiveTab = () => {} }
     </nav>
   );
 }
-
-MobileNav.propTypes = {
-  activeTab: PropTypes.string.isRequired,
-  setActiveTab: PropTypes.func.isRequired
-};

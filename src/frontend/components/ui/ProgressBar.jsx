@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 
 export default function ProgressBar({
   progress = 0,
@@ -62,16 +61,3 @@ export default function ProgressBar({
     </div>
   );
 }
-
-ProgressBar.propTypes = {
-  progress: PropTypes.number,
-  color: PropTypes.string,
-  backgroundColor: PropTypes.string,
-  height: PropTypes.number,
-  showLabel: PropTypes.bool,
-  labelPosition: PropTypes.oneOf(['left', 'center', 'right', 'inside']),
-  animated: PropTypes.bool,
-  striped: PropTypes.bool,
-  className: PropTypes.string,
-  style: PropTypes.object
-};
