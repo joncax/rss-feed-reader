@@ -11,17 +11,20 @@ export default function FeedStatsPanel({
   totalFeeds = 0,
   loading = false
 }) {
-  const totalItems = feeds.reduce((sum, feed) => {
+  // Validar se feeds é um array
+  const feedsArray = Array.isArray(feeds) ? feeds : [];
+
+  const totalItems = feedsArray.reduce((sum, feed) => {
     const count = feed.itemCount || feed.count || 0;
     return sum + count;
   }, 0);
 
-  const activeFeeds = feeds.filter(f => {
+  const activeFeeds = feedsArray.filter(f => {
     const status = f.status || f.enabled !== false;
     return status;
   }).length;
 
-  const lastUpdated = feeds.reduce((latest, feed) => {
+  const lastUpdated = feedsArray.reduce((latest, feed) => {
     const updated = feed.lastUpdated || feed.updated || '';
     if (!updated) return latest;
     const feedTime = new Date(updated).getTime();
@@ -45,7 +48,7 @@ export default function FeedStatsPanel({
           <div className="stat-icon">📺</div>
           <div className="stat-content">
             <p className="stat-label">Total Feeds</p>
-            <p className="stat-value">{totalFeeds}</p>
+            <p className="stat-value">{feedsArray.length}</p>
           </div>
         </div>
 
