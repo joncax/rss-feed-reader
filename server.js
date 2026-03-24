@@ -15,16 +15,14 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 
-// Phase 1 Services
-import db from './src/db-init.js';
-import torrentService from './src/torrent-service.js';
-import storageService from './src/storage-service.js';
+import db from './src/backend/db-init.js';
+import torrentService from './src/backend/torrent-service.js';
+import storageService from './src/backend/storage-service.js';
 
-// Phase 1 Routers
-import downloadsRouter from './src/api/downloads.js';
-import storageRouter from './src/api/storage.js';
-import historyRouter from './src/api/history.js';
-import quotaRouter from './src/api/quota.js';
+import downloadsRouter from './src/backend/api/downloads.js';
+import storageRouter from './src/backend/api/storage.js';
+import historyRouter from './src/backend/api/history.js';
+import quotaRouter from './src/backend/api/quota.js';
 
 // Load environment variables
 dotenv.config();
