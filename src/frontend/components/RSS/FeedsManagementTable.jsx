@@ -15,7 +15,10 @@ export default function FeedsManagementTable({
   isDeleting = () => false,
   isRefreshing = () => false
 }) {
-  if (feeds.length === 0) {
+  // Validar se feeds é um array
+  const feedsArray = Array.isArray(feeds) ? feeds : [];
+
+  if (feedsArray.length === 0) {
     return (
       <div className="empty-state">
         <p>📭 No feeds yet</p>
@@ -39,7 +42,7 @@ export default function FeedsManagementTable({
           </tr>
         </thead>
         <tbody>
-          {feeds.map((feed, index) => {
+          {feedsArray.map((feed, index) => {
             const feedName = typeof feed === 'string' ? feed : feed.name || feed;
             const feedUrl = feed.url || feed.rss || '';
             const lastUpdated = feed.lastUpdated || feed.updated || 'Never';
