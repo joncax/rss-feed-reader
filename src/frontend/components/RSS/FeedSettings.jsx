@@ -15,6 +15,7 @@ export default function FeedSettings({
   onSyncNow = () => {},
   isSyncing = false
 }) {
+  const feedsArray = Array.isArray(feeds) ? feeds : [];
   const intervals = [
     { value: 0, label: 'Off' },
     { value: 3600000, label: 'Auto (1h)' },
@@ -39,9 +40,9 @@ export default function FeedSettings({
             className="form-input"
           >
             <option value="">Choose a feed...</option>
-            {feeds.map(feed => (
-              <option key={feed} value={feed}>
-                {feed}
+            {feedsArray.map(feed => (
+              <option key={typeof feed === 'string' ? feed : feed.name} value={typeof feed === 'string' ? feed : feed.name}>
+                {typeof feed === 'string' ? feed : feed.name}
               </option>
             ))}
           </select>
