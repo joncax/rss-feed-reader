@@ -5,7 +5,7 @@
  */
 
 import React, { useState } from 'react';
-import FeedsList from './FeedsList';
+import FeedList from './FeedList';
 import FeedStatsPanel from './FeedStatsPanel';
 import { useFeeds } from '../../hooks/useFeeds';
 import Modal from '../ui/Modal';
