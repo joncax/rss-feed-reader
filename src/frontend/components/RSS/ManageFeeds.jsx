@@ -5,7 +5,7 @@
  */
 
 import React, { useState } from 'react';
-import FeedList from './FeedList';
+import FeedsManagementTable from './FeedsManagementTable';
 import FeedStatsPanel from './FeedStatsPanel';
 import { useFeeds } from '../../hooks/useFeeds';
 import Modal from '../ui/Modal';
@@ -169,7 +169,7 @@ export default function ManageFeeds() {
 
       {/* Feeds List */}
       {!feeds.loading && !feeds.error && (
-        <FeedsList
+        <FeedsManagementTable
           feeds={feeds.feeds}
           onEdit={handleEditFeed}
           onDelete={handleDeleteFeed}
