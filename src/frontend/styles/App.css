@@ -5,8 +5,12 @@
  */
 
 /* =============================================
-   APP LAYOUT
+   IMPORTS
    ============================================= */
+
+@import url('/style.css');
+@import url('./RSS.css');
+@import url('./DownloadCenter.css');
 
 .app {
   display: flex;
