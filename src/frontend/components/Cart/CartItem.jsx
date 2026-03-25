@@ -39,13 +39,6 @@ export default function CartItem({ item, onRemove, onPriorityChange }) {
         marginBottom: '8px',
       }}
     >
-      {/* Checkbox */}
-      <input
-        type="checkbox"
-        defaultChecked
-        style={{ width: '18px', height: '18px', cursor: 'pointer' }}
-      />
-
       {/* Item Info */}
       <div style={{ flex: 1 }}>
         <h4 style={{ margin: '0 0 4px 0', color: 'var(--text)' }}>

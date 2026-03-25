@@ -41,17 +41,19 @@ export default function CartModal({ isOpen, onClose, onDownloadAll, onCartCleare
     }
   };
 
-  const handleRemoveItem = async (itemId) => {
-    try {
-      const response = await fetch(`${API_URL}/api/cart/${itemId}`, { method: 'DELETE' });
-      if (response.ok) {
-        setCartItems(cartItems.filter((item) => item.id !== itemId));
-        fetchCart();
-      }
-    } catch (error) {
-      console.error('Error removing item:', error);
-    }
-  };
+const handleRemoveItem = async (itemId) => {
+	try {
+		const response = await fetch(`${API_URL}/api/cart/${itemId}`, { method: 'DELETE' });
+		if (response.ok) {
+			await fetchCart(); // Refetch para atualizar lista
+		} else {
+		alert('❌ Error removing item');
+		}
+	} catch (error) {
+		console.error('Error removing item:', error);
+		alert('❌ Error removing item');
+	}
+};
 
 const handleClearCart = async () => {
   if (!window.confirm('Clear entire cart?')) return;
