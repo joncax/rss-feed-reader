@@ -1,12 +1,13 @@
 /**
  * Header Component
  * File: src/frontend/components/Layout/Header.jsx
- * Cabeçalho da aplicação com logo e sync monitor
+ * Cabeçalho da aplicação com logo, sync monitor e cart badge
  */
 
 import React, { useState, useEffect } from 'react';
+import CartBadge from '../Cart/CartBadge';
 
-export default function Header() {
+export default function Header({ cartCount = 0, onCartClick }) {
   const [lastUpdate, setLastUpdate] = useState(null);
   const [nextSync, setNextSync] = useState(null);
 
@@ -41,6 +42,14 @@ export default function Header() {
           <span id="next-sync-label" className="sync-label timer-text">
             Next Sync: {nextSync || '--:--'}
           </span>
+        </div>
+
+        {/* Cart Badge */}
+        <div style={{ marginLeft: 'auto' }}>
+          <CartBadge 
+            itemCount={cartCount} 
+            onClick={onCartClick}
+          />
         </div>
       </div>
     </header>
