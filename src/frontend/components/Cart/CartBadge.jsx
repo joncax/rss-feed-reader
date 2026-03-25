@@ -64,4 +64,4 @@ export default function CartBadge({ itemCount = 0, totalSize = 0, onClick }) {
       </span>
     )}
   </button>
-);
+);}
