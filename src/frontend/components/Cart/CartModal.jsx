@@ -1,13 +1,15 @@
 /**
  * CartModal Component
  * File: src/frontend/components/Cart/CartModal.jsx
- * Complete shopping cart modal
+ * Complete shopping cart modal with absolute URLs
  */
 
 import { useState, useEffect } from 'react';
 import CartItem from './CartItem';
 import Card from '../ui/Card';
 import Modal from '../ui/Modal';
+
+const API_URL = 'http://192.168.1.86:3003';
 
 export default function CartModal({ isOpen, onClose, onDownloadAll }) {
   const [cartItems, setCartItems] = useState([]);
@@ -23,7 +25,7 @@ export default function CartModal({ isOpen, onClose, onDownloadAll }) {
   const fetchCart = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/cart');
+      const response = await fetch(`${API_URL}/api/cart`);
       const data = await response.json();
       if (data.success) {
         setCartItems(data.data);
@@ -38,7 +40,7 @@ export default function CartModal({ isOpen, onClose, onDownloadAll }) {
 
   const handleRemoveItem = async (itemId) => {
     try {
-      const response = await fetch(`/api/cart/${itemId}`, { method: 'DELETE' });
+      const response = await fetch(`${API_URL}/api/cart/${itemId}`, { method: 'DELETE' });
       if (response.ok) {
         setCartItems(cartItems.filter((item) => item.id !== itemId));
         fetchCart();
@@ -51,7 +53,7 @@ export default function CartModal({ isOpen, onClose, onDownloadAll }) {
   const handleClearCart = async () => {
     if (!window.confirm('Clear entire cart?')) return;
     try {
-      const response = await fetch('/api/cart', { method: 'DELETE' });
+      const response = await fetch(`${API_URL}/api/cart`, { method: 'DELETE' });
       if (response.ok) {
         setCartItems([]);
         setCartStats({ count: 0, totalSize: 0 });
@@ -63,7 +65,7 @@ export default function CartModal({ isOpen, onClose, onDownloadAll }) {
 
   const handleDownloadAll = async () => {
     try {
-      const response = await fetch('/api/cart/download-all', { method: 'POST' });
+      const response = await fetch(`${API_URL}/api/cart/download-all`, { method: 'POST' });
       const data = await response.json();
       if (data.success) {
         alert(`✅ ${data.itemsCount} items added to downloads!`);
