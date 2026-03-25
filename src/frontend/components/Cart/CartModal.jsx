@@ -17,10 +17,13 @@ export default function CartModal({ isOpen, onClose, onDownloadAll }) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (isOpen) {
-      fetchCart();
-    }
-  }, [isOpen]);
+	  if (isOpen) {
+		  fetchCart();
+    // Force refresh a cada 2 segundos enquanto aberto
+		  const interval = setInterval(fetchCart, 2000);
+		  return () => clearInterval(interval);
+		}
+}, [isOpen]);
 
   const fetchCart = async () => {
     try {
