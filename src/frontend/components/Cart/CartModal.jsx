@@ -50,34 +50,41 @@ export default function CartModal({ isOpen, onClose, onDownloadAll }) {
     }
   };
 
-  const handleClearCart = async () => {
-    if (!window.confirm('Clear entire cart?')) return;
-    try {
-      const response = await fetch(`${API_URL}/api/cart`, { method: 'DELETE' });
-      if (response.ok) {
-        setCartItems([]);
-        setCartStats({ count: 0, totalSize: 0 });
-      }
-    } catch (error) {
-      console.error('Error clearing cart:', error);
-    }
-  };
+const handleClearCart = async () => {
+	if (!window.confirm('Clear entire cart?')) return;
+	try {
+		const response = await fetch(`${API_URL}/api/cart`, { method: 'DELETE' });
+		if (response.ok) {
+			setCartItems([]);
+			setCartStats({ count: 0, totalSize: 0 });
+		} else {
+			alert('❌ Error clearing cart');
+		}
+	} catch (error) {
+    console.error('Error clearing cart:', error);
+    alert('❌ Error clearing cart');
+  }
+};
 
-  const handleDownloadAll = async () => {
-    try {
-      const response = await fetch(`${API_URL}/api/cart/download-all`, { method: 'POST' });
-      const data = await response.json();
-      if (data.success) {
-        alert(`✅ ${data.itemsCount} items added to downloads!`);
-        setCartItems([]);
-        onDownloadAll?.();
-        onClose();
-      }
-    } catch (error) {
-      console.error('Error downloading cart:', error);
-      alert('❌ Error downloading items');
-    }
-  };
+const handleDownloadAll = async () => {
+	try {
+		const response = await fetch(`${API_URL}/api/cart/download-all`, { method: 'POST' });
+		const data = await response.json();
+		if (data.success) {
+			alert(`✅ ${data.itemsCount} items added to downloads!`);
+			setCartItems([]);  // Limpa DEPOIS de sucesso
+			setCartStats({ count: 0, totalSize: 0 });
+			await fetchCart();  // Refetch para atualizar
+			onDownloadAll?.();
+			onClose();
+		} else {
+			alert(`❌ Error: ${data.error}`);
+		}
+	} catch (error) {
+		console.error('Error downloading cart:', error);
+		alert('❌ Error downloading items');
+	}
+};
 
   const formatSize = (bytes) => {
     if (!bytes) return '0 B';
