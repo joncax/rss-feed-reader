@@ -1,7 +1,7 @@
 /**
  * FeedCard Component
  * File: src/frontend/components/RSS/FeedCard.jsx
- * Card individual para um item do RSS feed
+ * Card individual para um item do RSS feed com Add to Cart
  */
 
 import React from 'react';
@@ -13,13 +13,15 @@ export default function FeedCard({
   item = {},
   onMagnet = null,
   onToggleRead = null,
+  onAddToCart = null,
   isRead = false
 }) {
   const {
     title = 'Unknown',
     magnet = '',
     pubDate = '',
-    guid = ''
+    guid = '',
+    feedName = 'Unknown Feed'
   } = item;
 
   const cleanTitle = sanitizeTitle(title);
@@ -37,6 +39,18 @@ export default function FeedCard({
     e.stopPropagation();
     if (onToggleRead) {
       onToggleRead(guid);
+    }
+  };
+
+  const handleAddToCart = (e) => {
+    e.stopPropagation();
+    if (magnet && onAddToCart) {
+      onAddToCart({
+        magnetLink: magnet,
+        title: cleanTitle,
+        feedName: feedName,
+        quality: quality.tag
+      });
     }
   };
 
@@ -75,6 +89,15 @@ export default function FeedCard({
         >
           🧲 GET
         </button>
+        {onAddToCart && (
+          <button
+            className="btn btn-sm btn-secondary"
+            onClick={handleAddToCart}
+            title="Add to shopping cart"
+          >
+            🛒 Cart
+          </button>
+        )}
         {onToggleRead && (
           <button
             className={`btn btn-sm btn-secondary ${isRead ? 'btn--active' : ''}`}
