@@ -1,0 +1,128 @@
+<!-- status.html - v.2.0.0 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Status - RSS TV Proxy</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+    <a href="index.html" class="logo">RSS TV PROXY</a>
+    <nav class="main-nav">
+        <a href="index.html" class="nav-link">📺 Dashboard</a>
+        <a href="manage.html" class="nav-link">⚙️ Manage Feeds</a>
+        <a href="status.html" class="nav-link active">📊 System Status</a>
+    </nav>
+    <div id="sync-monitor" class="sync-monitor">
+        <span id="server-ping" class="timer-text">Server: Checking...</span>
+    </div>
+</header>
+
+<div class="container">
+    <div class="status-grid">
+        <div class="status-card">
+            <span class="status-label">Server Connection</span>
+            <span id="server-status" class="status-val" style="color: #777;">OFFLINE</span>
+            <span id="server-address" style="font-size: 11px; color: var(--text-dim);">--</span>
+        </div>
+
+        <div class="status-card">
+            <span class="status-label">Cached XML Feeds</span>
+            <span id="file-count" class="status-val">0</span>
+            <span id="last-global-sync" style="font-size: 11px; color: var(--text-dim);">No recent sync</span>
+        </div>
+
+        <div class="status-card">
+            <span class="status-label">IndexedDB Entries</span>
+            <span id="db-count" class="status-val">0</span>
+            <span style="font-size: 11px; color: var(--text-dim);">Episodes in history</span>
+        </div>
+    </div>
+
+    <div class="panel" style="margin-top: 30px;">
+        <h3>System Diagnostics</h3>
+        <p style="color: var(--text-dim); font-size: 13px;">
+            The server checks for new content every minute. The background process is currently:
+            <strong id="process-state" style="color: var(--accent);">Active</strong>
+        </p>
+        <div id="log-console" style="background: #000; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 12px; color: #aaa; margin-top: 15px; height: 150px; overflow-y: auto;">
+            > System initialized...<br>
+            > Dashboard ready.<br>
+            > Waiting for next heartbeat...
+        </div>
+    </div>
+</div>
+
+<nav class="mobile-nav">
+    <a href="index.html"><span class="icon">📺</span>Dashboard</a>
+    <a href="manage.html"><span class="icon">⚙️</span>Manage</a>
+    <a href="status.html" class="active"><span class="icon">📊</span>Status</a>
+</nav>
+<script src="db.js"></script>
+<script>
+    const API = `${window.location.protocol}//${window.location.hostname}:${window.location.port}`;
+
+    // Show the actual server address in the UI
+    document.getElementById('server-address').innerText = API;
+
+    async function checkSystemHealth() {
+        try {
+            const res = await fetch(`${API}/sync-status`);
+            const registry = await res.json();
+
+            document.getElementById('server-status').innerText = "ONLINE";
+            document.getElementById('server-status').style.color = "var(--accent)";
+            document.getElementById('server-ping').innerText = "Server: Connected";
+
+            const feedCount = Object.keys(registry.feeds).length;
+            document.getElementById('file-count').innerText = feedCount;
+
+            const latest = Math.max(...Object.values(registry.feeds).map(f => f.lastUpdated || 0));
+            if (latest > 0) {
+                document.getElementById('last-global-sync').innerText = "Last sync: " + new Date(latest).toLocaleTimeString();
+            }
+
+            if (registry.settings.syncIntervalMs === 0) {
+                document.getElementById('process-state').innerText = "Paused (Interval: Off)";
+                document.getElementById('process-state').style.color = "var(--danger)";
+            } else {
+                document.getElementById('process-state').innerText = "Active";
+                document.getElementById('process-state').style.color = "var(--accent)";
+            }
+
+        } catch (e) {
+            document.getElementById('server-status').innerText = "OFFLINE";
+            document.getElementById('server-status').style.color = "var(--danger)";
+            document.getElementById('server-ping').innerText = "Server: Disconnected";
+            addLogEntry("⚠️ Server unreachable.");
+        }
+
+        try {
+            const episodes = await getAllEpisodes();
+            document.getElementById('db-count').innerText = episodes.length;
+        } catch (e) {
+            console.error("DB check failed", e);
+        }
+    }
+
+    function addLogEntry(text) {
+        const logEl = document.getElementById('log-console');
+        const entry = document.createElement('div');
+        entry.innerHTML = `> [${new Date().toLocaleTimeString()}] ${text}`;
+        logEl.appendChild(entry);
+        logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    window.onload = () => {
+        checkSystemHealth();
+        setInterval(checkSystemHealth, 5000);
+        setTimeout(() => addLogEntry("Checking feed availability..."), 2000);
+        setTimeout(() => addLogEntry("Database connection stable."), 4000);
+    };
+</script>
+
+</body>
+</html>

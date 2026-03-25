@@ -13,7 +13,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const router = express.Router();
 
 // Database
-const dbPath = path.join(__dirname, '../../.data/rss.db');
+const dbPath = path.join(__dirname, '../../../.data/rss.db');
 const db = new Database(dbPath);
 
 // =============================================
