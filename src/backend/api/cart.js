@@ -61,6 +61,69 @@ initCartTables();
 // =============================================
 
 /**
+ * GET /api/cart/settings
+ * Get cart settings
+ */
+router.get('/settings', (req, res) => {
+  try {
+    const settings = db.prepare(`
+      SELECT * FROM cart_settings WHERE id = 1
+    `).get();
+
+    res.json({
+      success: true,
+      data: settings || {
+        id: 1,
+        autoOrganize: true,
+        sequentialDownload: false,
+        bandwidthLimit: null,
+        maxConcurrentDownloads: 3,
+        scheduledTime: null
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching settings:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * PATCH /api/cart/settings
+ * Update cart settings
+ */
+router.patch('/settings', (req, res) => {
+  try {
+    const { autoOrganize, sequentialDownload, bandwidthLimit, maxConcurrentDownloads, scheduledTime } = req.body;
+
+    const stmt = db.prepare(`
+      UPDATE cart_settings
+      SET autoOrganize = COALESCE(?, autoOrganize),
+          sequentialDownload = COALESCE(?, sequentialDownload),
+          bandwidthLimit = COALESCE(?, bandwidthLimit),
+          maxConcurrentDownloads = COALESCE(?, maxConcurrentDownloads),
+          scheduledTime = COALESCE(?, scheduledTime),
+          updatedAt = ?
+      WHERE id = 1
+      RETURNING *
+    `);
+
+    const updated = stmt.get(
+      autoOrganize !== undefined ? autoOrganize : null,
+      sequentialDownload !== undefined ? sequentialDownload : null,
+      bandwidthLimit !== undefined ? bandwidthLimit : null,
+      maxConcurrentDownloads !== undefined ? maxConcurrentDownloads : null,
+      scheduledTime !== undefined ? scheduledTime : null,
+      new Date().toISOString()
+    );
+
+    res.json({ success: true, data: updated });
+  } catch (error) {
+    console.error('Error updating settings:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
  * GET /api/cart
  * Get all cart items
  */
