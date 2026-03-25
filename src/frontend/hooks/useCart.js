@@ -6,7 +6,7 @@
 
 import { useState, useCallback } from 'react';
 
-const API_URL = http://192.168.1.86:3003';
+const API_URL = 'http://192.168.1.86:3003';
 
 export default function useCart() {
   const [items, setItems] = useState([]);
