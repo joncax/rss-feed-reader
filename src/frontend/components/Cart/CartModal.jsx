@@ -11,7 +11,7 @@ import Modal from '../ui/Modal';
 
 const API_URL = 'http://192.168.1.86:3003';
 
-export default function CartModal({ isOpen, onClose, onDownloadAll }) {
+export default function CartModal({ isOpen, onClose, onDownloadAll, onCartCleared }) {
   const [cartItems, setCartItems] = useState([]);
   const [cartStats, setCartStats] = useState({ count: 0, totalSize: 0 });
   const [loading, setLoading] = useState(false);
