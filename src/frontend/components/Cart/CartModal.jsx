@@ -4,7 +4,6 @@
  * Complete shopping cart modal with absolute URLs
  */
 
-import CartSettings from './CartSettings';
 import { useState, useEffect } from 'react';
 import CartItem from './CartItem';
 import Card from '../ui/Card';
@@ -80,9 +79,9 @@ const handleDownloadAll = async () => {
 		const data = await response.json();
 		if (data.success) {
 			alert(`✅ ${data.itemsCount} items added to downloads!`);
-			setCartItems([]);
+			setCartItems([]);  // Limpa DEPOIS de sucesso
 			setCartStats({ count: 0, totalSize: 0 });
-			await fetchCart();
+			await fetchCart();  // Refetch para atualizar
 			onDownloadAll?.();
 			onClose();
 		} else {
@@ -125,10 +124,7 @@ const handleDownloadAll = async () => {
           </div>
         ) : (
           <>
-			{/* Cart Settings */}
-			<CartSettings />
-			
-			{/* Cart Items */}
+            {/* Cart Items */}
             <div style={{ marginBottom: '20px' }}>
               <h3 style={{ margin: '0 0 12px 0', color: 'var(--text)' }}>
                 Items ({cartStats.count})
