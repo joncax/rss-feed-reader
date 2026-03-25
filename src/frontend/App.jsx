@@ -75,7 +75,11 @@ export default function App() {
       <CartModal 
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
-        onDownloadAll={handleCartDownloadAll}
+        onDownloadAll={() => {
+			cart.fetchCart();
+			setActiveTab('downloads');
+		}}
+		onCartCleared={() => cart.fetchCart()}
       />
     </div>
   )

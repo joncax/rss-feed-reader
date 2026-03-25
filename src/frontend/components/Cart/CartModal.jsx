@@ -60,13 +60,11 @@ const handleClearCart = async () => {
 		if (response.ok) {
 			setCartItems([]);
 			setCartStats({ count: 0, totalSize: 0 });
-		} else {
-			alert('❌ Error clearing cart');
+			onCartCleared?.();
 		}
 	} catch (error) {
-    console.error('Error clearing cart:', error);
-    alert('❌ Error clearing cart');
-  }
+	  console.error('Error clearing cart:', error);
+    }
 };
 
 const handleDownloadAll = async () => {
