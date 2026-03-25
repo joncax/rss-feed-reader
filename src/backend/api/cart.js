@@ -173,7 +173,8 @@ router.delete('/:id', (req, res) => {
  */
 router.delete('/', (req, res) => {
   try {
-    const stmt = db.prepare(`DELETE FROM cart_items WHERE status = 'pending'`);
+    // DELETE real - remove tudo com status = 'pending' OU 'downloading'
+    const stmt = db.prepare(`DELETE FROM cart_items WHERE status IN ('pending', 'downloading')`);
     const result = stmt.run();
 
     res.json({

@@ -54,17 +54,21 @@ export default function CartModal({ isOpen, onClose, onDownloadAll }) {
   };
 
 const handleClearCart = async () => {
-	if (!window.confirm('Clear entire cart?')) return;
-	try {
-		const response = await fetch(`${API_URL}/api/cart`, { method: 'DELETE' });
-		if (response.ok) {
-			setCartItems([]);
-			setCartStats({ count: 0, totalSize: 0 });
-			onCartCleared?.();
-		}
-	} catch (error) {
-	  console.error('Error clearing cart:', error);
+  if (!window.confirm('Clear entire cart?')) return;
+  try {
+    // DELETE real do carrinho
+    const response = await fetch(`${API_URL}/api/cart`, { method: 'DELETE' });
+    if (response.ok) {
+      setCartItems([]);
+      setCartStats({ count: 0, totalSize: 0 });
+      onCartCleared?.();
+    } else {
+      alert('❌ Error clearing cart');
     }
+  } catch (error) {
+    console.error('Error clearing cart:', error);
+    alert('❌ Error clearing cart');
+  }
 };
 
 const handleDownloadAll = async () => {
