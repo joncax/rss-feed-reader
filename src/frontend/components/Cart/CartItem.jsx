@@ -1,29 +1,16 @@
 /**
  * CartItem Component
  * File: src/frontend/components/Cart/CartItem.jsx
- * Individual shopping cart item
+ * Individual shopping cart item - simplified
  */
 
-export default function CartItem({ item, onRemove, onPriorityChange }) {
+export default function CartItem({ item, onRemove }) {
   const formatSize = (bytes) => {
     if (!bytes) return 'Unknown';
     if (bytes < 1024) return bytes + ' B';
     if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
     if (bytes < 1073741824) return (bytes / 1048576).toFixed(1) + ' MB';
     return (bytes / 1073741824).toFixed(2) + ' GB';
-  };
-
-  const getPriorityColor = (priority) => {
-    switch (priority) {
-      case 'high':
-        return '#e74c3c';
-      case 'normal':
-        return '#3498db';
-      case 'low':
-        return '#95a5a6';
-      default:
-        return '#3498db';
-    }
   };
 
   return (
@@ -56,26 +43,6 @@ export default function CartItem({ item, onRemove, onPriorityChange }) {
           {item.size && <span> • {formatSize(item.size)}</span>}
         </p>
       </div>
-
-      {/* Priority Select */}
-      <select
-        value={item.priority || 'normal'}
-        onChange={(e) => onPriorityChange(item.id, e.target.value)}
-        style={{
-          padding: '6px 8px',
-          background: 'var(--surface)',
-          border: `2px solid ${getPriorityColor(item.priority)}`,
-          borderRadius: '4px',
-          color: 'var(--text)',
-          cursor: 'pointer',
-          fontSize: '12px',
-          fontWeight: '500',
-        }}
-      >
-        <option value="high">🔴 High</option>
-        <option value="normal">🔵 Normal</option>
-        <option value="low">⚪ Low</option>
-      </select>
 
       {/* Remove Button */}
       <button

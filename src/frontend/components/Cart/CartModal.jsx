@@ -130,15 +130,12 @@ const handleDownloadAll = async () => {
                 Items ({cartStats.count})
               </h3>
               {cartItems.map((item) => (
-                <CartItem
-                  key={item.id}
-                  item={item}
-                  onRemove={handleRemoveItem}
-                  onPriorityChange={(id, priority) => {
-                    // TODO: Implement priority update
-                  }}
-                />
-              ))}
+				<CartItem
+					key={item.id}
+					item={item}
+					onRemove={handleRemoveItem}
+				/>
+			  ))}
             </div>
 
             {/* Cart Summary */}
