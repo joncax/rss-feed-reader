@@ -13,6 +13,7 @@ import DownloadCenter from './components/DownloadCenter/DownloadCenter'
 import SystemStatus from './components/Status/SystemStatus'
 import CartModal from './components/Cart/CartModal'
 import useCart from './hooks/useCart'
+import SimpleRSSDemo from './components/RSS/SimpleRSSDemo'
 import './styles/App.css'
 
 export default function App() {
@@ -28,7 +29,7 @@ export default function App() {
   const renderTab = () => {
     switch (activeTab) {
       case 'rss':
-        return <RSSFeedManager onAddToCart={handleAddToCart} />
+		return <SimpleRSSDemo onAddToCart={handleAddToCart} />
       case 'manage':
         return <ManageFeeds />
       case 'downloads':
