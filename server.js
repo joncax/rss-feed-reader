@@ -13,6 +13,7 @@ import { fileURLToPath } from 'url';
 
 // Imports - API Routers
 import feedsRouter from './src/backend/api/feeds.js';
+import cartRouter from './src/backend/api/cart.js';
 import downloadsRouter from './src/backend/api/downloads.js';
 import storageRouter from './src/backend/api/storage.js';
 import historyRouter from './src/backend/api/history.js';
@@ -39,6 +40,7 @@ app.use(express.static(path.join(__dirname, 'dist')));
 
 // RSS Feeds Management (Phase 1H)
 app.use('/api/feeds', feedsRouter);
+app.use('/api/cart', cartRouter);
 
 // Downloads Management (Phase 1D)
 app.use('/api/downloads', downloadsRouter);
